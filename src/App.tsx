@@ -46,6 +46,10 @@ const App: Component = () => {
     setTodos(todos => todos.map(todo => ({ ...todo, completed })));
   }
 
+  const clearCompleted = () => {
+    setTodos(todos => todos.filter(todo => !todo.completed));
+  }
+
   const filterTodos = (todos: Todo[]) => {
     if (showMode() === 'active') {
       return todos.filter(todo => !todo.completed);
@@ -125,6 +129,9 @@ const App: Component = () => {
               </a>
             </li>
           </ul>
+          <Show when={remainingCount() !== todos().length}>
+            <button class="clear-completed" onClick={clearCompleted}>Clear completed</button>
+          </Show>
         </footer>
       </Show>
     </section >
