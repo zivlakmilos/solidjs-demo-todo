@@ -25,6 +25,13 @@ const App: Component = () => {
     }
   }
 
+  const toggle = (todoId: number) => {
+    setTodos(todos => todos.map((todo => {
+      if (todo.id !== todoId) return todo;
+      return { ...todo, completed: !todo.completed };
+    })))
+  }
+
   return (
     <section class="todoapp">
       <header class="header">
@@ -39,9 +46,13 @@ const App: Component = () => {
           <For each={todos()}>
             {
               todo => (
-                <li class="todo">
+                <li class="todo" classList={{ completed: todo.completed }}>
                   <div class="view">
-                    <input type="checkbox" class="toggle" />
+                    <input
+                      type="checkbox"
+                      class="toggle"
+                      checked={todo.completed}
+                      onInput={() => toggle(todo.id)} />
                     <label>{todo.title}</label>
                     <button class="destroy" />
                   </div>
