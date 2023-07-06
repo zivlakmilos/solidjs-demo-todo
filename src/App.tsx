@@ -1,4 +1,4 @@
-import { createSignal, type Component, Show, For, createMemo } from 'solid-js';
+import { createSignal, type Component, Show, For, createMemo, onCleanup } from 'solid-js';
 
 let counter = 0;
 
@@ -13,9 +13,10 @@ type Todo = {
 
 const App: Component = () => {
   const [todos, setTodos] = createSignal<Todo[]>([]);
+  const [showMode, setShowMode] = createSignal('all');
 
-  const remainingCout = createMemo(() => {
-    return todos().length !== todos().filter(todo => todo.completed).length;
+  const remainingCount = createMemo(() => {
+    return todos().length - todos().filter(todo => todo.completed).length;
   });
 
   const addTodo = (event: any) => {
@@ -45,6 +46,25 @@ const App: Component = () => {
     setTodos(todos => todos.map(todo => ({ ...todo, completed })));
   }
 
+  const filterTodos = (todos: Todo[]) => {
+    if (showMode() === 'active') {
+      return todos.filter(todo => !todo.completed);
+    } else if (showMode() === 'completed') {
+      return todos.filter(todo => todo.completed);
+    }
+
+    return todos;
+  }
+
+  const locationHandler = () => {
+    setShowMode(location.hash.slice(2) || 'all');
+  }
+
+  window.addEventListener('hashchange', locationHandler);
+  onCleanup(() => {
+    window.removeEventListener('hashchange', locationHandler);
+  });
+
   return (
     <section class="todoapp">
       <header class="header">
@@ -60,11 +80,11 @@ const App: Component = () => {
             id="toggle-all"
             class="toggle-all"
             type="checkbox"
-            checked={!remainingCout()}
+            checked={!remainingCount()}
             onInput={toggleAll} />
           <label for="toggle-all" />
           <ul class="todo-list">
-            <For each={todos()}>
+            <For each={filterTodos(todos())}>
               {
                 todo => (
                   <li class="todo" classList={{ completed: todo.completed }}>
@@ -83,8 +103,31 @@ const App: Component = () => {
             </For>
           </ul>
         </section>
+        <footer class="footer">
+          <span class="todo-count">
+            <strong>{remainingCount()}</strong>
+            {remainingCount() === 1 ? ' item ' : ' items '}left
+          </span>
+          <ul class="filters">
+            <li>
+              <a href="#/" classList={{ selected: showMode() === 'all' }}>
+                All
+              </a>
+            </li>
+            <li>
+              <a href="#/active" classList={{ selected: showMode() === 'active' }}>
+                Active
+              </a>
+            </li>
+            <li>
+              <a href="#/completed" classList={{ selected: showMode() === 'completed' }}>
+                Completed
+              </a>
+            </li>
+          </ul>
+        </footer>
       </Show>
-    </section>
+    </section >
   );
 };
 
