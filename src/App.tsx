@@ -32,6 +32,10 @@ const App: Component = () => {
     })))
   }
 
+  const remove = (todoId: number) => {
+    setTodos(todos => todos.filter(todo => todo.id !== todoId));
+  }
+
   return (
     <section class="todoapp">
       <header class="header">
@@ -54,7 +58,7 @@ const App: Component = () => {
                       checked={todo.completed}
                       onInput={() => toggle(todo.id)} />
                     <label>{todo.title}</label>
-                    <button class="destroy" />
+                    <button class="destroy" onClick={() => remove(todo.id)} />
                   </div>
                 </li>
               )
