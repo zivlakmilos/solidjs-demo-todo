@@ -1,4 +1,4 @@
-import { createSignal, type Component, Show, For } from 'solid-js';
+import { createSignal, type Component, Show, For, createMemo } from 'solid-js';
 
 let counter = 0;
 
@@ -13,6 +13,10 @@ type Todo = {
 
 const App: Component = () => {
   const [todos, setTodos] = createSignal<Todo[]>([]);
+
+  const remainingCout = createMemo(() => {
+    return todos().length !== todos().filter(todo => todo.completed).length;
+  });
 
   const addTodo = (event: any) => {
     const title = event.target.value.trim();
@@ -36,6 +40,11 @@ const App: Component = () => {
     setTodos(todos => todos.filter(todo => todo.id !== todoId));
   }
 
+  const toggleAll = (event: any) => {
+    const completed = event.target.checked;
+    setTodos(todos => todos.map(todo => ({ ...todo, completed })));
+  }
+
   return (
     <section class="todoapp">
       <header class="header">
@@ -46,25 +55,34 @@ const App: Component = () => {
           onKeyDown={addTodo} />
       </header>
       <Show when={todos().length > 0}>
-        <ul class="todo-list">
-          <For each={todos()}>
-            {
-              todo => (
-                <li class="todo" classList={{ completed: todo.completed }}>
-                  <div class="view">
-                    <input
-                      type="checkbox"
-                      class="toggle"
-                      checked={todo.completed}
-                      onInput={() => toggle(todo.id)} />
-                    <label>{todo.title}</label>
-                    <button class="destroy" onClick={() => remove(todo.id)} />
-                  </div>
-                </li>
-              )
-            }
-          </For>
-        </ul>
+        <section class="main">
+          <input
+            id="toggle-all"
+            class="toggle-all"
+            type="checkbox"
+            checked={!remainingCout()}
+            onInput={toggleAll} />
+          <label for="toggle-all" />
+          <ul class="todo-list">
+            <For each={todos()}>
+              {
+                todo => (
+                  <li class="todo" classList={{ completed: todo.completed }}>
+                    <div class="view">
+                      <input
+                        type="checkbox"
+                        class="toggle"
+                        checked={todo.completed}
+                        onInput={() => toggle(todo.id)} />
+                      <label>{todo.title}</label>
+                      <button class="destroy" onClick={() => remove(todo.id)} />
+                    </div>
+                  </li>
+                )
+              }
+            </For>
+          </ul>
+        </section>
       </Show>
     </section>
   );
